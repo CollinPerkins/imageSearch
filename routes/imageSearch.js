@@ -19,7 +19,6 @@ router.get('/', function(req, res, next) {
     term: searchTerm,
     when: new Date().toJSON()
   }, function(err, newItem){
-    console.log(newItem);
   });
   googleSearch.build({
 
@@ -32,29 +31,34 @@ router.get('/', function(req, res, next) {
     siteSearch: "" // Restricts results to URLs from a specified site
 
   }, function(error, response) {
-
-    var emptyArray = [];
-    for(var i = 0; i < response.items.length; i++){
-      var emptyObject = {
-        url: '',
-        snippet: '',
-        thumbnail: ''
-      }
-      emptyObject.url = response.items[i].link;
-      emptyObject.snippet = response.items[i].snippet;
-      if(response.items[i].hasOwnProperty('pagemap')){
-        if(response.items[i].pagemap.hasOwnProperty('cse_image')){
-          if(response.items[i].pagemap.cse_image.length !== 0){
-            emptyObject.thumbnail = response.items[i].pagemap.cse_image[0].src;
-          } else {
-            emptyObject.thumbnail = '';
+    if(response.items === undefined) {
+      res.send('Sorry something went wrong please make sure you have no more then 10 items and the route is correct.');
+    } else {
+      console.log(response);
+      var emptyArray = [];
+      for(var i = 0; i < response.items.length; i++){
+        var emptyObject = {
+          url: '',
+          snippet: '',
+          thumbnail: ''
+        }
+        emptyObject.url = response.items[i].link;
+        emptyObject.snippet = response.items[i].snippet;
+        if(response.items[i].hasOwnProperty('pagemap')){
+          if(response.items[i].pagemap.hasOwnProperty('cse_image')){
+            if(response.items[i].pagemap.cse_image.length !== 0){
+              emptyObject.thumbnail = response.items[i].pagemap.cse_image[0].src;
+            } else {
+              emptyObject.thumbnail = '';
+            }
           }
         }
+        emptyArray.push(emptyObject);
       }
-      emptyArray.push(emptyObject);
+
+      res.send(emptyArray);
     }
 
-    res.send(emptyArray);
   });
 });
 
